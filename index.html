@@ -4,7 +4,8 @@
   <title>IoT Monitoring</title>
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: 'Segoe UI';
@@ -21,11 +22,11 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.3);
     }
 
-    .flex {
-      display: flex;
-      gap: 15px;
-    }
-
+ .flex {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
     button {
       padding: 10px;
       border-radius: 10px;
@@ -64,6 +65,23 @@
     canvas {
       max-height: 180px;
     }
+    @media (max-width: 768px) {
+  .flex {
+    flex-direction: column;
+  }
+
+  button {
+  min-width: 80px;
+}
+
+  .card {
+    width: 100%;
+  }
+
+  canvas {
+    max-height: 250px;
+  }
+}
   </style>
 </head>
 
