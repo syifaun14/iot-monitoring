@@ -4,8 +4,9 @@
   <title>IoT Monitoring</title>
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
     body {
       font-family: 'Segoe UI';
@@ -22,18 +23,19 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.3);
     }
 
- .flex {
-  display: flex;
-  gap: 15px;
-  flex-wrap: wrap;
-}
-button {
-  padding: 10px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-}
+    .flex {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
 
     .btn-connect { background: #22c55e; }
     .btn-disconnect { background: #ef4444; }
@@ -64,23 +66,24 @@ button {
     canvas {
       max-height: 180px;
     }
+
     @media (max-width: 768px) {
-  .flex {
-    flex-direction: column;
-  }
+      .flex {
+        flex-direction: column;
+      }
 
-  button {
-  min-width: 100px;
-}
+      button {
+        min-width: 100px;
+      }
 
-  .card {
-    width: 100%;
-  }
+      .card {
+        width: 100%;
+      }
 
-  canvas {
-    max-height: 250px;
-  }
-}
+      canvas {
+        max-height: 250px;
+      }
+    }
   </style>
 </head>
 
@@ -88,18 +91,16 @@ button {
 
 <div class="flex">
 
-  <!-- CARD KIRI -->
   <div class="card" style="flex:2">
     <h2>IoT Monitoring</h2>
 
     <div class="flex">
-      <span id="status" class="status-inline">Terputus</span>
+      <span id="status">Terputus</span>
       <button class="btn-connect" onclick="connect()">Hubungkan</button>
       <button class="btn-disconnect" onclick="disconnect()">Putus</button>
     </div>
   </div>
 
-  <!-- CARD KANAN (LDR) -->
   <div class="card" style="flex:1">
     <h3>LDR</h3>
     <h2 id="ldr">-</h2>
@@ -159,43 +160,9 @@ const chart = new Chart(ctx, {
   data: {
     labels: [],
     datasets: [
-      {
-        label: 'Suhu (°C)',
-        data: [],
-        borderWidth: 2,
-        tension: 0.4,
-        pointRadius: 2
-      },
-      {
-        label: 'Kelembapan (%)',
-        data: [],
-        borderWidth: 2,
-        tension: 0.4,
-        pointRadius: 2,
-        borderColor: '#3b82f6'
-      }
+      { label: 'Suhu', data: [] },
+      { label: 'Kelembapan', data: [] }
     ]
-  },
-  options: {
-    responsive: true,
-    animation: false,
-    plugins: {
-      legend: {
-        labels: {
-          color: 'white'
-        }
-      }
-    },
-    scales: {
-      x: {
-        ticks: { color: 'white', maxTicksLimit: 8 },
-        grid: { color: '#334155' }
-      },
-      y: {
-        ticks: { color: 'white' },
-        grid: { color: '#334155' }
-      }
-    }
   }
 });
 
@@ -207,11 +174,13 @@ function connect() {
 
     client.subscribe("smk/iot/suhu6");
     client.subscribe("smk/iot/kelembapan6");
+    client.subscribe("smk/iot/ldr6"); // <<< TAMBAHAN
   });
 
   client.on("message", (topic, message) => {
     let msg = message.toString();
 
+    // ===== SUHU =====
     if (topic.includes("suhu")) {
       document.getElementById("suhu").innerText = msg;
 
@@ -224,15 +193,26 @@ function connect() {
       bar.style.background = warna;
 
       updateChart(msg, null);
-
-      document.getElementById("ldr").innerText =
-        msg > 28 ? "Terang" : "Gelap";
     }
 
+    // ===== KELEMBAPAN =====
     if (topic.includes("kelembapan")) {
       document.getElementById("hum").innerText = msg;
       document.getElementById("barHum").style.width = msg + "%";
       updateChart(null, msg);
+    }
+
+    // ===== LDR (FIX UTAMA) =====
+    if (topic.includes("ldr")) {
+      let el = document.getElementById("ldr");
+
+      if (msg == "1") {
+        el.innerText = "Terang";
+        el.style.color = "yellow";
+      } else {
+        el.innerText = "Gelap";
+        el.style.color = "cyan";
+      }
     }
   });
 }
@@ -270,26 +250,9 @@ function updateChart(s, h) {
 
   chart.data.labels.push(time);
 
-  // ===== SUHU =====
-  if (s !== null) {
-    chart.data.datasets[0].data.push(parseFloat(s));
+  chart.data.datasets[0].data.push(s);
+  chart.data.datasets[1].data.push(h);
 
-    // warna dinamis
-    if (s > 30) chart.data.datasets[0].borderColor = "red";
-    else if (s > 25) chart.data.datasets[0].borderColor = "yellow";
-    else chart.data.datasets[0].borderColor = "lime";
-  } else {
-    chart.data.datasets[0].data.push(null);
-  }
-
-  // ===== KELEMBAPAN =====
-  if (h !== null) {
-    chart.data.datasets[1].data.push(parseFloat(h));
-  } else {
-    chart.data.datasets[1].data.push(null);
-  }
-
-  // ===== LIMIT DATA (lebih panjang) =====
   if (chart.data.labels.length > 50) {
     chart.data.labels.shift();
     chart.data.datasets.forEach(d => d.data.shift());
