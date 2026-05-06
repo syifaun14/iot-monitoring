@@ -123,50 +123,51 @@
 
 <div class="flex">
 
-  <div class="card" style="flex:1">
-    <h3>Mode</h3>
-    <div class="flex">
-      <button class="btn-manual" onclick="setMode('manual')">Manual</button>
-      <button class="btn-auto" onclick="setMode('auto')">Otomatis</button>
-    </div>
+<!-- MODE SENDIRI -->
+<div class="card">
+  <h3>Mode</h3>
+  <div class="flex">
+    <button class="btn-manual" onclick="setMode('manual')">Manual</button>
+    <button class="btn-auto" onclick="setMode('auto')">Otomatis</button>
   </div>
-
-  <div class="card" style="flex:2">
-    <h3>Kontrol Relay</h3>
-
-    <div class="flex">
-
-      <div class="relay-box">
-        <h4>Relay 1</h4>
-        <button class="relay-on" onclick="setRelay(1, true)">ON</button>
-        <button class="relay-off" onclick="setRelay(1, false)">OFF</button>
-      </div>
-
-      <div class="relay-box">
-        <h4>Relay 2</h4>
-        <button class="relay-on" onclick="setRelay(2, true)">ON</button>
-        <button class="relay-off" onclick="setRelay(2, false)">OFF</button>
-      </div>
-
-      <div class="relay-box">
-        <h4>Relay 3</h4>
-        <button class="relay-on" onclick="setRelay(3, true)">ON</button>
-        <button class="relay-off" onclick="setRelay(3, false)">OFF</button>
-      </div>
-
-      <div class="relay-box">
-        <h4>Relay 4</h4>
-        <button class="relay-on" onclick="setRelay(4, true)">ON</button>
-        <button class="relay-off" onclick="setRelay(4, false)">OFF</button>
-      </div>
-
-    </div>
-  </div>
-
 </div>
 
+<!-- RELAY -->
 <div class="card">
-  <h3>Grafik</h3>
+  <h3>Kontrol Relay</h3>
+
+  <div class="flex">
+
+    <div class="relay-box">
+      <h4>Relay 1</h4>
+      <button class="relay-on" onclick="setRelay(1, true)">ON</button>
+      <button class="relay-off" onclick="setRelay(1, false)">OFF</button>
+    </div>
+
+    <div class="relay-box">
+      <h4>Relay 2</h4>
+      <button class="relay-on" onclick="setRelay(2, true)">ON</button>
+      <button class="relay-off" onclick="setRelay(2, false)">OFF</button>
+    </div>
+
+    <div class="relay-box">
+      <h4>Relay 3</h4>
+      <button class="relay-on" onclick="setRelay(3, true)">ON</button>
+      <button class="relay-off" onclick="setRelay(3, false)">OFF</button>
+    </div>
+
+    <div class="relay-box">
+      <h4>Relay 4</h4>
+      <button class="relay-on" onclick="setRelay(4, true)">ON</button>
+      <button class="relay-off" onclick="setRelay(4, false)">OFF</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- GRAFIK FULL -->
+<div class="card">
+  <h3>Grafik Monitoring</h3>
   <canvas id="chart"></canvas>
 </div>
 
