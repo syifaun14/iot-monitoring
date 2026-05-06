@@ -29,12 +29,23 @@
       flex-wrap: wrap;
     }
 
-    button {
+    .relay-box {
+      background: #111827;
       padding: 10px;
       border-radius: 10px;
+      text-align: center;
+      flex: 1;
+      min-width: 120px;
+    }
+
+    button {
+      padding: 8px;
+      border-radius: 8px;
       border: none;
       cursor: pointer;
       font-weight: bold;
+      margin: 3px;
+      width: 70px;
     }
 
     .btn-connect { background: #22c55e; }
@@ -45,11 +56,6 @@
 
     .relay-on { background: #22c55e; }
     .relay-off { background: #ef4444; }
-
-    .status-inline {
-      margin-left: 10px;
-      font-weight: bold;
-    }
 
     .bar {
       height: 10px;
@@ -72,14 +78,6 @@
         flex-direction: column;
       }
 
-      button {
-        min-width: 100px;
-      }
-
-      .card {
-        width: 100%;
-      }
-
       canvas {
         max-height: 250px;
       }
@@ -93,7 +91,6 @@
 
   <div class="card" style="flex:2">
     <h2>IoT Monitoring</h2>
-
     <div class="flex">
       <span id="status">Terputus</span>
       <button class="btn-connect" onclick="connect()">Hubungkan</button>
@@ -125,8 +122,9 @@
 </div>
 
 <div class="flex">
+
   <div class="card" style="flex:1">
-    <h3>Mode: <span id="modeText">-</span></h3>
+    <h3>Mode</h3>
     <div class="flex">
       <button class="btn-manual" onclick="setMode('manual')">Manual</button>
       <button class="btn-auto" onclick="setMode('auto')">Otomatis</button>
@@ -135,13 +133,36 @@
 
   <div class="card" style="flex:2">
     <h3>Kontrol Relay</h3>
+
     <div class="flex">
-      <button id="r1" class="relay-off" onclick="toggleRelay(1)">OFF</button>
-      <button id="r2" class="relay-off" onclick="toggleRelay(2)">OFF</button>
-      <button id="r3" class="relay-off" onclick="toggleRelay(3)">OFF</button>
-      <button id="r4" class="relay-off" onclick="toggleRelay(4)">OFF</button>
+
+      <div class="relay-box">
+        <h4>Relay 1</h4>
+        <button class="relay-on" onclick="setRelay(1, true)">ON</button>
+        <button class="relay-off" onclick="setRelay(1, false)">OFF</button>
+      </div>
+
+      <div class="relay-box">
+        <h4>Relay 2</h4>
+        <button class="relay-on" onclick="setRelay(2, true)">ON</button>
+        <button class="relay-off" onclick="setRelay(2, false)">OFF</button>
+      </div>
+
+      <div class="relay-box">
+        <h4>Relay 3</h4>
+        <button class="relay-on" onclick="setRelay(3, true)">ON</button>
+        <button class="relay-off" onclick="setRelay(3, false)">OFF</button>
+      </div>
+
+      <div class="relay-box">
+        <h4>Relay 4</h4>
+        <button class="relay-on" onclick="setRelay(4, true)">ON</button>
+        <button class="relay-off" onclick="setRelay(4, false)">OFF</button>
+      </div>
+
     </div>
   </div>
+
 </div>
 
 <div class="card">
@@ -152,7 +173,6 @@
 <script>
 let client;
 let mode = "manual";
-let relayState = [false, false, false, false];
 
 const ctx = document.getElementById('chart');
 const chart = new Chart(ctx, {
@@ -174,13 +194,12 @@ function connect() {
 
     client.subscribe("smk/iot/suhu6");
     client.subscribe("smk/iot/kelembapan6");
-    client.subscribe("smk/iot/ldr6"); // <<< TAMBAHAN
+    client.subscribe("smk/iot/ldr6");
   });
 
   client.on("message", (topic, message) => {
     let msg = message.toString();
 
-    // ===== SUHU =====
     if (topic.includes("suhu")) {
       document.getElementById("suhu").innerText = msg;
 
@@ -195,14 +214,12 @@ function connect() {
       updateChart(msg, null);
     }
 
-    // ===== KELEMBAPAN =====
     if (topic.includes("kelembapan")) {
       document.getElementById("hum").innerText = msg;
       document.getElementById("barHum").style.width = msg + "%";
       updateChart(null, msg);
     }
 
-    // ===== LDR (FIX UTAMA) =====
     if (topic.includes("ldr")) {
       let el = document.getElementById("ldr");
 
@@ -225,31 +242,22 @@ function disconnect() {
 function setMode(m) {
   mode = m;
   client.publish("smk/iot/mode6", m);
-  document.getElementById("modeText").innerText =
-    m === "manual" ? "Mode Manual" : "Mode Otomatis";
 }
 
-function toggleRelay(n) {
+function setRelay(n, state) {
   if (mode !== "manual") {
     alert("Mode harus Manual!");
     return;
   }
 
-  relayState[n-1] = !relayState[n-1];
-
-  let msg = `relay${n}_${relayState[n-1] ? "on" : "off"}`;
+  let msg = `relay${n}_${state ? "on" : "off"}`;
   client.publish("smk/iot/control6", msg);
-
-  let btn = document.getElementById("r" + n);
-  btn.innerText = relayState[n-1] ? "ON" : "OFF";
-  btn.className = relayState[n-1] ? "relay-on" : "relay-off";
 }
 
 function updateChart(s, h) {
   let time = new Date().toLocaleTimeString();
 
   chart.data.labels.push(time);
-
   chart.data.datasets[0].data.push(s);
   chart.data.datasets[1].data.push(h);
 
